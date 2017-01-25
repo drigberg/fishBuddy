@@ -1,7 +1,7 @@
 //----------global defaults
 //
 const constants = {
-    backgroundColor : "rgba(255, 255, 255, 1)",
+    backgroundColor : "rgba(0, 0, 255, 0.2)",
     deceleration : 0.3,
     acceleration : 0.1,
     slowDownRadius : 30,
@@ -206,7 +206,7 @@ var Fish = function(x, y){
                 this.accelerate();
             };
 
-            if (distanceToTarget < 20) {
+            if (distanceToTarget < 40) {
                 this.target.alive = false;
             };
 
@@ -269,7 +269,7 @@ var Fish = function(x, y){
 
         stroke(10);
 
-        if (frameCount % 2 == 0) {
+        if (frameCount % 4 == 0) {
             this.selectImage();
         };
 
