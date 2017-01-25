@@ -73,11 +73,12 @@ function updateBubbles() {
 
 function updateFishFoods() {
     for (var i = 0; i < fishFoods.length; i++) {
-        if (!fishFoods[i].alive) {
-            fishFoods.splice(i, 1);
-            continue;
+        if (fishFoods[i]) {
+            fishFoods[i].update();
+            if (!fishFoods[i].alive) {
+                fishFoods[i] = null;
+            };
         };
-        fishFoods[i].update();
     };
 };
 
@@ -198,7 +199,7 @@ var Fish = function(x, y){
         //destination vector is weighted down for gradual turns
         var sumVector;
         if (target.x != null && target.y != null) {
-            let distanceToTarget = findDistance(this.x + this.width / 2, this.y + this.height / 2, target.x, target.y);
+            let distanceToTarget = findDistance(this.x + this.width / 2, this.y + this.height / 2, target.x + target.width, target.y + target.height);
             if (distanceToTarget <= constants.slowDownRadius) {
                 this.decelerate();
             } else {
@@ -211,7 +212,7 @@ var Fish = function(x, y){
 
             this.executeWander();
 
-            var unitVectorToTarget = findUnitVector(this.x + this.width / 2, this.y + this.height / 2, target.x, target.y);
+            var unitVectorToTarget = findUnitVector(this.x + this.width / 2, this.y + this.height / 2, target.x + target.width, target.y + target.height);
             sumUnitVector = findUnitVector(
                 0,
                 0,
@@ -228,9 +229,17 @@ var Fish = function(x, y){
     };
 
     this.update = function(){
-        if (fishFoods.length) {
-            this.target = fishFoods[0];
-        } else {
+        let targetExists = false;
+
+        for (var i = 0; i < fishFoods.length; i++) {
+            if (fishFoods[i] != null) {
+                this.target = fishFoods[i];
+                targetExists = true;
+                break;
+            };
+        };
+
+        if (!targetExists) {
             this.target = {x : null, y : null};
         };
 
@@ -273,6 +282,7 @@ var FishFood = function(x, y) {
     var that = this;
     this.x = x;
     this.y = y;
+    this.image = null;
     this.width = 10
     this.height = 10;
     this.vector = new Vector(0, -1, 0);
@@ -310,10 +320,23 @@ var FishFood = function(x, y) {
         this.sink();
         this.x += this.vector.x * this.vector.magnitude;
         this.y += this.vector.y * this.vector.magnitude;
-        stroke(10);
-        fill(10);
-        ellipse(this.x, this.y, this.width, this.height);
+
+        if (this.image) {
+            image(this.image, this.x, this.y);
+        } else {
+            stroke(10);
+            fill(10);
+            ellipse(this.x, this.y, this.width, this.height);
+        };
     };
+
+    this.loadImage = function() {
+        this.image = loadImage("../assets/fishFood.png");
+        this.width = this.image.width;
+        this.height = this.image.height;
+    };
+
+    this.loadImage();
 };
 
 var Bubble = function(x, y, vector) {
@@ -371,7 +394,17 @@ var Vector = function(x, y, magnitude) {
 //=========================
 function touchStarted() {
     if (fish) {
-        fishFoods.push(new FishFood(mouseX, mouseY));
+        let created = false;
+        for (var i = 0; i < fishFoods.length; i++) {
+            if (fishFoods[i] == null) {
+                fishFoods[i] = new FishFood(mouseX, mouseY);
+                created = true;
+                break;
+            };
+        }
+        if (!created) {
+            fishFoods.push(new FishFood(mouseX, mouseY));
+        };
     };
 };
 
