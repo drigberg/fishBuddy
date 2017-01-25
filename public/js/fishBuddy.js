@@ -229,18 +229,22 @@ var Fish = function(x, y){
     };
 
     this.update = function(){
-        let targetExists = false;
-
+        let distanceToTarget = Infinity;
+        let proposedTarget = null;
         for (var i = 0; i < fishFoods.length; i++) {
             if (fishFoods[i] != null) {
-                this.target = fishFoods[i];
-                targetExists = true;
-                break;
+                let newDistance = findDistance(this.x + this.width / 2, this.y + this.height / 2, fishFoods[i].x + fishFoods[i].width, fishFoods[i].y + fishFoods[i].height);
+                if (newDistance < distanceToTarget) {
+                    distanceToTarget = newDistance;
+                    proposedTarget = fishFoods[i];
+                };
             };
         };
 
-        if (!targetExists) {
-            this.target = {x : null, y : null};
+        if (proposedTarget) {
+            this.target = proposedTarget;
+        } else {
+            this.target = {x : null, y: null};
         };
 
         this.turnTowards(this.target);
@@ -336,7 +340,7 @@ var FishFood = function(x, y) {
         this.height = this.image.height;
     };
 
-    this.loadImage();
+    // this.loadImage();
 };
 
 var Bubble = function(x, y, vector) {
